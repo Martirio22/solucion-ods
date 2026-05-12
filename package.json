@@ -1,0 +1,23 @@
+{
+  "name": "agua-alerta-api",
+  "version": "1.0.0",
+  "description": "API REST AguaAlerta con Node.js, Express, MongoDB y arquitectura hexagonal",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node src/seed.js"
+  },
+  "author": "Martirio",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.10.0",
+    "validator": "^13.12.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

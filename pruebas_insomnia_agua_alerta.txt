@@ -1,0 +1,220 @@
+============================================================
+PRUEBAS INSOMNIA - AGUA ALERTA API
+============================================================
+
+VARIABLES RECOMENDADAS EN INSOMNIA ENVIRONMENT:
+{
+  "base_url": "http://localhost:3977",
+  "municipio_id": "",
+  "tipo_problema_id": "",
+  "usuario_id": "",
+  "reporte_id": "",
+  "oficio_id": ""
+}
+
+------------------------------------------------------------
+1) VERIFICAR API
+------------------------------------------------------------
+GET {{ base_url }}/
+
+------------------------------------------------------------
+2) CREAR MUNICIPIO
+------------------------------------------------------------
+POST {{ base_url }}/api/municipios
+Content-Type: application/json
+
+{
+  "nombre": "Quito",
+  "emailContacto": "reportes@quito.gob.ec",
+  "telefono": "023000000"
+}
+
+------------------------------------------------------------
+3) LISTAR MUNICIPIOS
+------------------------------------------------------------
+GET {{ base_url }}/api/municipios
+
+Copia el id de la respuesta en la variable municipio_id.
+
+------------------------------------------------------------
+4) CREAR TIPO DE PROBLEMA
+------------------------------------------------------------
+POST {{ base_url }}/api/tipos-problema
+Content-Type: application/json
+
+{
+  "nombre": "Fuga de tubería",
+  "icono": "droplet-off",
+  "umbralAlerta": 3
+}
+
+------------------------------------------------------------
+5) LISTAR TIPOS DE PROBLEMA
+------------------------------------------------------------
+GET {{ base_url }}/api/tipos-problema
+
+Copia el id de la respuesta en la variable tipo_problema_id.
+
+------------------------------------------------------------
+6) CREAR USUARIO ANÓNIMO OPCIONAL
+------------------------------------------------------------
+POST {{ base_url }}/api/usuarios
+Content-Type: application/json
+
+{
+  "nombre": "Ciudadano anónimo",
+  "esAnonimo": true
+}
+
+Puedes copiar el id en usuario_id o usar null en los reportes.
+
+------------------------------------------------------------
+7) CREAR REPORTE
+------------------------------------------------------------
+POST {{ base_url }}/api/reportes
+Content-Type: application/json
+
+{
+  "usuarioId": null,
+  "tipoProblemaId": "{{ tipo_problema_id }}",
+  "municipioId": "{{ municipio_id }}",
+  "descripcion": "Hay una fuga de agua potable en la esquina principal del barrio.",
+  "latitud": -0.180653,
+  "longitud": -78.467834,
+  "direccionReferencia": "Av. Amazonas y Naciones Unidas",
+  "nivelUrgencia": "media"
+}
+
+Copia el id de la respuesta en reporte_id.
+
+------------------------------------------------------------
+8) LISTAR REPORTES
+------------------------------------------------------------
+GET {{ base_url }}/api/reportes
+
+Filtros disponibles:
+GET {{ base_url }}/api/reportes?estado=pendiente
+GET {{ base_url }}/api/reportes?municipioId={{ municipio_id }}
+GET {{ base_url }}/api/reportes?tipoProblemaId={{ tipo_problema_id }}
+GET {{ base_url }}/api/reportes?nivelUrgencia=alta
+
+------------------------------------------------------------
+9) OBTENER REPORTE POR ID
+------------------------------------------------------------
+GET {{ base_url }}/api/reportes/{{ reporte_id }}
+
+------------------------------------------------------------
+10) AGREGAR EVIDENCIA
+------------------------------------------------------------
+POST {{ base_url }}/api/reportes/{{ reporte_id }}/evidencias
+Content-Type: application/json
+
+{
+  "usuarioId": null,
+  "urlArchivo": "https://miservidor.com/evidencias/fuga-agua-001.jpg",
+  "tipoArchivo": "imagen",
+  "descripcion": "Foto tomada desde la esquina del barrio."
+}
+
+------------------------------------------------------------
+11) VER EVIDENCIAS DEL REPORTE
+------------------------------------------------------------
+GET {{ base_url }}/api/reportes/{{ reporte_id }}/evidencias
+
+------------------------------------------------------------
+12) CONFIRMAR REPORTE
+------------------------------------------------------------
+POST {{ base_url }}/api/reportes/{{ reporte_id }}/confirmar
+Content-Type: application/json
+
+{
+  "usuarioId": null,
+  "ipHash": "ip_anonima_001",
+  "dispositivoHash": "device_abc_001"
+}
+
+Para probar varias confirmaciones cambia dispositivoHash:
+
+{
+  "usuarioId": null,
+  "ipHash": "ip_anonima_002",
+  "dispositivoHash": "device_abc_002"
+}
+
+{
+  "usuarioId": null,
+  "ipHash": "ip_anonima_003",
+  "dispositivoHash": "device_abc_003"
+}
+
+Si llega al umbral, el sistema cambia el estado a escalado y genera oficio automáticamente.
+
+------------------------------------------------------------
+13) VER CONFIRMACIONES DEL REPORTE
+------------------------------------------------------------
+GET {{ base_url }}/api/reportes/{{ reporte_id }}/confirmaciones
+
+------------------------------------------------------------
+14) VER HISTORIAL DEL REPORTE
+------------------------------------------------------------
+GET {{ base_url }}/api/reportes/{{ reporte_id }}/historial
+
+------------------------------------------------------------
+15) GENERAR OFICIO MANUALMENTE
+------------------------------------------------------------
+POST {{ base_url }}/api/reportes/{{ reporte_id }}/generar-oficio
+Content-Type: application/json
+
+{}
+
+Nota: si ya se generó automáticamente, responderá que el reporte ya tiene oficio.
+
+------------------------------------------------------------
+16) VER OFICIOS DEL REPORTE
+------------------------------------------------------------
+GET {{ base_url }}/api/reportes/{{ reporte_id }}/oficios
+
+------------------------------------------------------------
+17) LISTAR TODOS LOS OFICIOS
+------------------------------------------------------------
+GET {{ base_url }}/api/oficios
+
+Copia el id de algún oficio en oficio_id.
+
+------------------------------------------------------------
+18) MARCAR OFICIO COMO ENVIADO
+------------------------------------------------------------
+PUT {{ base_url }}/api/oficios/{{ oficio_id }}/marcar-enviado
+Content-Type: application/json
+
+{}
+
+------------------------------------------------------------
+19) CAMBIAR ESTADO DEL REPORTE
+------------------------------------------------------------
+PUT {{ base_url }}/api/reportes/{{ reporte_id }}/cambiar-estado
+Content-Type: application/json
+
+{
+  "estado": "en_revision",
+  "nivelUrgencia": "alta",
+  "comentario": "El reporte será revisado por personal municipal."
+}
+
+Estados permitidos:
+pendiente, en_revision, escalado, resuelto, rechazado
+
+Urgencias permitidas:
+baja, media, alta, critica
+
+------------------------------------------------------------
+20) RESOLVER REPORTE
+------------------------------------------------------------
+PUT {{ base_url }}/api/reportes/{{ reporte_id }}/cambiar-estado
+Content-Type: application/json
+
+{
+  "estado": "resuelto",
+  "nivelUrgencia": "baja",
+  "comentario": "El problema fue atendido por el municipio."
+}
