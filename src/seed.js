@@ -7,6 +7,9 @@ const UsuarioModel = require("./lib/Usuario/Infraestructura/UsuarioModel");
 async function seed() {
   await connection();
 
+  await TipoProblemaModel.deleteMany({});
+  await MunicipioModel.deleteMany({});
+
   await MunicipioModel.insertMany([
     { nombre: "Quito", emailContacto: "reportes@quito.gob.ec", telefono: "023000000" },
     { nombre: "Guayaquil", emailContacto: "reportes@guayaquil.gob.ec", telefono: "043000000" },
@@ -16,11 +19,11 @@ async function seed() {
   ], { ordered: false }).catch(() => {});
 
   await TipoProblemaModel.insertMany([
-    { nombre: "Fuga de tubería", icono: "droplet-off", umbralAlerta: 3 },
-    { nombre: "Agua contaminada", icono: "alert-triangle", umbralAlerta: 5 },
-    { nombre: "Sin acceso al agua", icono: "x-circle", umbralAlerta: 4 },
-    { nombre: "Alcantarilla obstruida", icono: "trash", umbralAlerta: 3 },
-    { nombre: "Pozo contaminado", icono: "flask", umbralAlerta: 5 }
+    { nombre: "Fuga de tubería", icono: "💧", umbralAlerta: 3 },
+    { nombre: "Agua contaminada", icono: "⚠️", umbralAlerta: 5 },
+    { nombre: "Sin acceso al agua", icono: "🚫", umbralAlerta: 4 },
+    { nombre: "Alcantarilla obstruida", icono: "🗑️", umbralAlerta: 3 },
+    { nombre: "Pozo contaminado", icono: "🧪", umbralAlerta: 5 }
   ], { ordered: false }).catch(() => {});
 
   await UsuarioModel.create({ nombre: "Ciudadano anónimo", esAnonimo: true }).catch(() => {});
