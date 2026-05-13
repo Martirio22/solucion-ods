@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { connection, disconnect } = require("./Infraestructura/database/Mongo");
 const MunicipioModel = require("./lib/Municipio/Infraestructura/MunicipioModel");
 const TipoProblemaModel = require("./lib/TipoProblema/Infraestructura/TipoProblemaModel");
