@@ -1,0 +1,66 @@
+<div class="p-8">
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Oficios generados</h1>
+    <p class="text-sm text-gray-500 mt-1">Documentos oficiales para municipios</p>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    @if (loading()) {
+      <div class="py-16 text-center text-gray-400 text-sm animate-pulse">Cargando oficios...</div>
+    } @else if (oficios().length === 0) {
+      <div class="py-16 text-center text-gray-400 text-sm">
+        <p class="text-3xl mb-2">📄</p>
+        No hay oficios generados aún.
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Oficio</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Asunto</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Municipio</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Estado</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Fecha</th>
+            <th class="px-6 py-3.5"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @for (o of oficios(); track o.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 font-mono text-gray-500 text-xs">
+                {{ o.numeroOficio || '-' }}
+              </td>
+              <td class="px-6 py-4 font-medium text-gray-900 max-w-xs truncate">{{ o.asunto }}</td>
+              <td class="px-6 py-4 text-gray-500">{{ getMunicipioNombre(o) }}</td>
+              <td class="px-6 py-4">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                             {{ o.estado === 'enviado'   ? 'bg-green-100 text-green-700' :
+                                o.estado === 'generado'  ? 'bg-blue-100 text-blue-700' :
+                                o.estado === 'fallido'   ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-500' }}">
+                  {{ o.estado }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-gray-400 text-xs">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3 justify-end">
+                  <a [routerLink]="['/admin/reportes', getReporteId(o)]"
+                     class="text-xs text-blue-600 hover:text-blue-700 font-medium">Ver reporte</a>
+                  @if (o.estado !== 'enviado') {
+                    <button (click)="marcarEnviado(o.id)"
+                            class="text-xs text-green-600 hover:text-green-700 font-medium">
+                      ✓ Marcar enviado
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

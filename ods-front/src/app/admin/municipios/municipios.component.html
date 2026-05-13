@@ -1,0 +1,121 @@
+<div class="p-8">
+
+  <!-- Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Municipios</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ municipios().length }} registrados</p>
+    </div>
+    <button (click)="openCreate()"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600
+                   rounded-xl hover:bg-blue-700 transition-colors">
+      + Nuevo municipio
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    @if (loading()) {
+      <div class="py-16 text-center text-gray-400 text-sm animate-pulse">Cargando...</div>
+    } @else if (municipios().length === 0) {
+      <div class="py-16 text-center text-gray-400 text-sm">
+        <p class="text-3xl mb-2">🏛</p>
+        No hay municipios registrados aún.
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Nombre</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Email</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Teléfono</th>
+            <th class="px-6 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wide">Reportes activos</th>
+            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Estado</th>
+            <th class="px-6 py-3.5"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          @for (m of municipios(); track m.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 font-medium text-gray-900">{{ m.nombre }}</td>
+              <td class="px-6 py-4 text-gray-500">{{ m.emailContacto || '-' }}</td>
+              <td class="px-6 py-4 text-gray-500">{{ m.telefono || '-' }}</td>
+              <td class="px-6 py-4 text-right font-semibold text-gray-700">{{ m.reportesActivos }}</td>
+              <td class="px-6 py-4">
+                <span [class]="m.activo
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-500'"
+                  class="text-xs font-medium px-2.5 py-1 rounded-full">
+                  {{ m.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-3">
+                  <button (click)="openEdit(m)"
+                          class="text-blue-600 hover:text-blue-700 text-xs font-medium">Editar</button>
+                  <button (click)="delete(m.id)"
+                          class="text-red-400 hover:text-red-600 text-xs font-medium">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Modal CRUD -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="showModal.set(false)">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+         (click)="$event.stopPropagation()">
+
+      <h3 class="font-bold text-gray-900 text-lg mb-5">
+        {{ editing() ? 'Editar municipio' : 'Nuevo municipio' }}
+      </h3>
+
+      @if (error()) {
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">{{ error() }}</div>
+      }
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">
+            Nombre <span class="text-red-500">*</span>
+          </label>
+          <input type="text" [(ngModel)]="form.nombre" placeholder="Ej: Bogotá D.C."
+                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Email de contacto</label>
+          <input type="email" [(ngModel)]="form.emailContacto" placeholder="contacto@municipio.gov.co"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
+          <input type="tel" [(ngModel)]="form.telefono" placeholder="+57 1 234 5678"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button (click)="showModal.set(false)"
+                class="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200
+                       rounded-xl hover:bg-gray-50 transition-colors">
+          Cancelar
+        </button>
+        <button (click)="save()" [disabled]="saving()"
+                class="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600
+                       rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors">
+          @if (saving()) { Guardando... } @else { Guardar }
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,125 @@
+<!-- Backdrop -->
+<div class="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+     style="background: rgba(0,0,0,0.5);"
+     (click)="close.emit()">
+
+  <!-- Modal card -->
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-xl">💧</div>
+        <div>
+          <h2 class="font-bold text-gray-900 text-lg">Reportar problema</h2>
+          <p class="text-xs text-gray-400">
+            📍 {{ lat | number:'1.4-4' }}, {{ lng | number:'1.4-4' }}
+          </p>
+        </div>
+      </div>
+      <button (click)="close.emit()"
+              class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+        ✕
+      </button>
+    </div>
+
+    <!-- Form -->
+    <div class="px-6 py-5 space-y-4">
+
+      @if (error()) {
+        <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Tipo de problema -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+          Tipo de problema <span class="text-red-500">*</span>
+        </label>
+        <select [(ngModel)]="form.tipoProblemaId"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
+          <option value="">Selecciona un tipo...</option>
+          @for (t of tipos(); track t.id) {
+            <option [value]="t.id">{{ iconEmoji(t.icono) }} {{ t.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Municipio -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">
+          Municipio <span class="text-red-500">*</span>
+        </label>
+        <select [(ngModel)]="form.municipioId"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
+          <option value="">Selecciona un municipio...</option>
+          @for (m of municipios(); track m.id) {
+            <option [value]="m.id">{{ m.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Dirección de referencia -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Dirección de referencia</label>
+        <input type="text"
+               [(ngModel)]="form.direccionReferencia"
+               placeholder="Ej: Calle 10 con Av. Principal, frente al parque"
+               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700" />
+      </div>
+
+      <!-- Descripción -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Descripción</label>
+        <textarea [(ngModel)]="form.descripcion"
+                  rows="3"
+                  placeholder="Describe brevemente el problema que observas..."
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"></textarea>
+      </div>
+
+      <!-- Urgencia -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Nivel de urgencia</label>
+        <div class="grid grid-cols-4 gap-2">
+          @for (nivel of ['baja', 'media', 'alta', 'critica']; track nivel) {
+            <button type="button"
+                    (click)="form.nivelUrgencia = $any(nivel)"
+                    [class.ring-2]="form.nivelUrgencia === nivel"
+                    [class.ring-blue-500]="form.nivelUrgencia === nivel"
+                    class="py-2 text-xs font-medium rounded-xl border border-gray-200 capitalize
+                           hover:border-blue-300 transition-all">
+              {{ nivel }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-gray-100 flex gap-3">
+      <button (click)="close.emit()"
+              class="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200
+                     rounded-xl hover:bg-gray-50 transition-colors">
+        Cancelar
+      </button>
+      <button (click)="submit()"
+              [disabled]="saving()"
+              class="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600
+                     rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors
+                     flex items-center justify-center gap-2">
+        @if (saving()) {
+          <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          Enviando...
+        } @else {
+          Enviar reporte
+        }
+      </button>
+    </div>
+  </div>
+</div>

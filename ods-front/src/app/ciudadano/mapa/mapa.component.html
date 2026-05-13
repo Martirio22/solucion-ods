@@ -1,0 +1,126 @@
+<div class="h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between z-10 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">💧</div>
+      <h1 class="text-xl font-bold text-gray-900">AguaAlerta</h1>
+    </div>
+    <div class="flex items-center gap-6">
+      @if (loading()) {
+        <span class="text-sm text-gray-400 animate-pulse">Cargando...</span>
+      } @else {
+        <span class="text-sm text-gray-500">
+          <span class="font-semibold text-gray-800">{{ reportes().length }}</span> reportes activos
+        </span>
+      }
+      <a routerLink="/admin"
+         class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+        Panel Admin →
+      </a>
+    </div>
+  </header>
+
+  <!-- Map area -->
+  <div class="flex-1 relative overflow-hidden">
+    <div #mapContainer class="w-full h-full"></div>
+
+    <!-- Selecting location banner -->
+    @if (selectingLocation()) {
+      <div class="absolute top-4 left-1/2 -translate-x-1/2 z-[1001]
+                  bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg
+                  flex items-center gap-3 text-sm font-medium">
+        <span class="animate-pulse">📍</span>
+        Haz clic en el mapa para ubicar el problema
+        <button (click)="cancelSelectingLocation()"
+                class="ml-2 text-blue-200 hover:text-white font-semibold">✕</button>
+      </div>
+    }
+
+    <!-- Filters panel -->
+    <div class="absolute top-4 left-4 z-[1000] bg-white rounded-xl shadow-lg p-4 w-64">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+        <span>🔍</span> Filtros
+      </h3>
+
+      <div class="space-y-2">
+        <select [(ngModel)]="filters.estado" (change)="loadReportes()"
+                class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
+          <option value="">Todos los estados</option>
+          @for (key of estadoKeys; track key) {
+            <option [value]="key">{{ estadoConfig[key].label }}</option>
+          }
+        </select>
+
+        <select [(ngModel)]="filters.municipioId" (change)="loadReportes()"
+                class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
+          <option value="">Todos los municipios</option>
+          @for (m of municipios(); track m.id) {
+            <option [value]="m.id">{{ m.nombre }}</option>
+          }
+        </select>
+
+        <select [(ngModel)]="filters.tipoProblemaId" (change)="loadReportes()"
+                class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
+          <option value="">Todos los tipos</option>
+          @for (t of tipos(); track t.id) {
+            <option [value]="t.id">{{ t.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      @if (filters.estado || filters.municipioId || filters.tipoProblemaId) {
+        <button (click)="clearFilters()"
+                class="mt-3 w-full text-xs text-blue-600 hover:text-blue-700 font-medium py-1">
+          Limpiar filtros
+        </button>
+      }
+    </div>
+
+    <!-- Legend -->
+    <div class="absolute bottom-10 left-4 z-[1000] bg-white rounded-xl shadow-lg p-3">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Estado</p>
+      <div class="space-y-1.5">
+        @for (key of estadoKeys; track key) {
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                 [style.background-color]="estadoConfig[key].color"></div>
+            <span class="text-xs text-gray-600">{{ estadoConfig[key].label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- FAB reportar -->
+    <button (click)="startCrearReporte()"
+            [disabled]="selectingLocation()"
+            class="absolute bottom-10 right-4 z-[1000]
+                   flex items-center gap-2 px-6 py-3
+                   bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400
+                   text-white font-semibold rounded-full shadow-xl
+                   transition-all duration-200 active:scale-95 text-sm">
+      <span>+</span>
+      Reportar problema
+    </button>
+
+    <!-- Panel detalle reporte (ciudadano) -->
+    @if (selectedReporte(); as reporte) {
+      <app-detalle-reporte
+        [reporte]="reporte"
+        (close)="selectedReporte.set(null)"
+        (refreshMap)="loadReportes()" />
+    }
+
+    <!-- Modal crear reporte -->
+    @if (showCrearReporte()) {
+      <app-crear-reporte
+        [lat]="pendingLatLng()?.lat ?? 4.6097"
+        [lng]="pendingLatLng()?.lng ?? -74.0817"
+        (close)="onCrearReporteClose()"
+        (created)="onReporteCreated()" />
+    }
+  </div>
+</div>

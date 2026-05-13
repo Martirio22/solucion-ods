@@ -1,0 +1,88 @@
+<div class="p-8">
+
+  <!-- Page title -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <p class="text-sm text-gray-500 mt-1">Resumen general del sistema</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center h-48 text-gray-400 text-sm animate-pulse">
+      Cargando estadísticas...
+    </div>
+  } @else {
+
+    <!-- Stats cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <p class="text-xs text-gray-400 uppercase font-semibold tracking-wide">Total</p>
+        <p class="text-4xl font-bold text-gray-900 mt-2">{{ total }}</p>
+        <p class="text-xs text-gray-400 mt-1">reportes en el sistema</p>
+      </div>
+
+      <div class="bg-blue-50 rounded-2xl p-5 shadow-sm border border-blue-100">
+        <p class="text-xs text-blue-400 uppercase font-semibold tracking-wide">Pendientes</p>
+        <p class="text-4xl font-bold text-blue-700 mt-2">{{ pendientes }}</p>
+        <p class="text-xs text-blue-400 mt-1">sin atender</p>
+      </div>
+
+      <div class="bg-red-50 rounded-2xl p-5 shadow-sm border border-red-100">
+        <p class="text-xs text-red-400 uppercase font-semibold tracking-wide">Escalados</p>
+        <p class="text-4xl font-bold text-red-600 mt-2">{{ escalados().length }}</p>
+        <p class="text-xs text-red-400 mt-1">requieren atención urgente</p>
+      </div>
+
+      <div class="bg-green-50 rounded-2xl p-5 shadow-sm border border-green-100">
+        <p class="text-xs text-green-400 uppercase font-semibold tracking-wide">Resueltos</p>
+        <p class="text-4xl font-bold text-green-600 mt-2">{{ resueltos }}</p>
+        <p class="text-xs text-green-400 mt-1">casos cerrados</p>
+      </div>
+
+    </div>
+
+    <!-- Escalados recientes -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="font-semibold text-gray-900">Reportes escalados</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Umbral de confirmaciones superado — acción requerida</p>
+        </div>
+        <a routerLink="/admin/reportes" [queryParams]="{ estado: 'escalado' }"
+           class="text-sm text-blue-600 hover:text-blue-700 font-medium">Ver todos →</a>
+      </div>
+
+      @if (escalados().length === 0) {
+        <div class="py-12 text-center text-gray-400 text-sm">
+          <p class="text-3xl mb-2">✅</p>
+          No hay reportes escalados en este momento.
+        </div>
+      } @else {
+        <div class="divide-y divide-gray-50">
+          @for (reporte of escalados(); track reporte.id) {
+            <a [routerLink]="['/admin/reportes', reporte.id]"
+               class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors group">
+
+              <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-lg shrink-0">💧</div>
+
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">{{ getTipoNombre(reporte) }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ getMunicipioNombre(reporte) }} · {{ reporte.confirmaciones }} confirmaciones</p>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span [class]="urgenciaConfig[reporte.nivelUrgencia].bg + ' ' + urgenciaConfig[reporte.nivelUrgencia].text
+                               + ' text-xs font-medium px-2.5 py-1 rounded-full'">
+                  {{ urgenciaConfig[reporte.nivelUrgencia].label }}
+                </span>
+                <span class="text-xs text-gray-300 group-hover:text-gray-500 transition-colors">→</span>
+              </div>
+
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+  }
+</div>
